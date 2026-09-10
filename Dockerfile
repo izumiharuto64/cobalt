@@ -7,7 +7,10 @@ WORKDIR /app
 COPY . /app
 
 RUN corepack enable
-RUN apk add --no-cache python3 alpine-sdk
+RUN apk add --no-cache python3 alpine-sdk git
+
+# ダミーのgitリポジトリを生成してバージョンチェックを回避
+RUN git init && git config user.name "build" && git config user.email "build@local" && git add . && git commit -m "build"
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile
@@ -18,7 +21,7 @@ FROM base AS api
 WORKDIR /app
 
 COPY --from=build --chown=node:node /prod/api /app
-# COPY --from=build --chown=node:node /app/.git /app/.git
+COPY --from=build --chown=node:node /app/.git /app/.git
 
 USER node
 
