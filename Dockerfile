@@ -9,8 +9,13 @@ COPY . /app
 RUN corepack enable
 RUN apk add --no-cache python3 alpine-sdk git
 
-# ダミーのgitリポジトリを生成してバージョンチェックを回避
-RUN git init && git config user.name "build" && git config user.email "build@local" && git add . && git commit -m "build"
+# ダミーのgitリポジトリとリモートURLを設定してチェックを通過させる
+RUN git init && \
+    git config user.name "build" && \
+    git config user.email "build@local" && \
+    git remote add origin https://github.com/imputnet/cobalt.git && \
+    git add . && \
+    git commit -m "build"
 
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
     pnpm install --prod --frozen-lockfile
